@@ -1,0 +1,27 @@
+version: "3.9"
+services:
+  node:
+    depends_on:
+      - mysql
+      - mongo
+    build:
+      context: .
+    ports:
+      - 8080:8080
+    entrypoint: [ "./wait-for", "db:3306", "--", "npm", "run", "app" ]
+    env_file:
+     vars.env
+  mongo:
+    image: "redis:alpine"
+    ports:
+      - 27017:27017
+    env_file:
+      vars.env
+    volumes:
+      - smarterplay_mongo:/etc/mongo
+  sql:
+    image: mariadb
+    volumes:
+      - smarterplay_sql:/var/lib/mysql
+    env_file:
+      vars.env
