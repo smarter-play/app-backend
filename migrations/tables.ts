@@ -3,11 +3,12 @@ import db from "../lib/db";
 async function initTables() {
     await db.query(`
     CREATE TABLE users (
-        id varchar(128) primary key,
+        id varchar(22) primary key,
         name varchar(30) not null,
         surname varchar(30) not null,
         email varchar(50) not null unique,
-        password varchar(255) not null
+        date_of_birth datetime not null,
+        password varchar(128) not null
     );
     CREATE TABLE fields (
         id varchar(128) primary key,

@@ -10,3 +10,6 @@ router.init();
 
 db.init();
 console.log("hot reloading!")
+import user from './lib/User'
+
+user.create("nome", "cognome", "prova@prova.com", "prova", new Date());

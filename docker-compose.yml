@@ -2,7 +2,7 @@ version: "3.9"
 services:
   node:
     depends_on:
-      - mysql
+      - sql
       - mongo
     build:
       context: .
@@ -12,7 +12,7 @@ services:
     env_file:
      vars.env
   mongo:
-    image: "redis:alpine"
+    image: "mongo"
     ports:
       - 27017:27017
     env_file:
@@ -25,3 +25,6 @@ services:
       - smarterplay_sql:/var/lib/mysql
     env_file:
       vars.env
+volumes:
+  smarterplay_mongo:
+  smarterplay_sql:
