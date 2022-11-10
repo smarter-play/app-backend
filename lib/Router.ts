@@ -25,6 +25,7 @@ export default class Router{
         );
 
         this.app.use('/', require("./routes/main"));
+        this.app.use('/auth', require("./routes/auth"));
         
         this.app.listen(process.env.PORT);
 
