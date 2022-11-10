@@ -22,16 +22,16 @@ class User {
 
     static async create(name: string, surname: string, email: string, password: string, date_of_birth: Date): Promise<void> {
         let id = nanoid();
-        let pw = argon2.hash(password, {
-            type: argon2.argon2id,
-            memoryCost: 2 ** 16,
-            hashLength: 50,
-            timeCost: 4
-        });
+        console.log("generato id");
+        try {
+        let pw = await argon2.hash(password);
+        console.log([id, name, surname, email, pw, date_of_birth.toISOString().slice(0,10)]);
         return await db.query(
-            'INSERT INTO users(id, name, surname, email, password, date_of_birth) VALUES (?, ?, ?, ?, ?, ?, ?)',
-            [id, name, surname, email, pw, date_of_birth.toISOString().slice(0, 19).replace('T', ' ')]
+            'INSERT INTO users(id, name, surname, email, password, date_of_birth) VALUES (?, ?, ?, ?, ?, ?)',
+            [id, name, surname, email, pw, date_of_birth.toISOString().slice(0,10)]
         );
+        } catch(e) {console.log(e);}
+        
     }
 
 

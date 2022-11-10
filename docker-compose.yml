@@ -11,6 +11,8 @@ services:
     entrypoint: [ "./wait-for", "sql:3306", "--", "npm", "run", "app" ]
     env_file:
      vars.env
+    volumes:
+      - ./lib:/code/lib
   mongo:
     image: "mongo"
     ports:

@@ -7,7 +7,7 @@ async function initTables() {
         name varchar(30) not null,
         surname varchar(30) not null,
         email varchar(50) not null unique,
-        date_of_birth datetime not null,
+        date_of_birth date not null,
         password varchar(128) not null
     );
     CREATE TABLE IF NOT EXISTS fields (
@@ -23,8 +23,8 @@ async function initTables() {
         score2 integer not null default 0
     );
     CREATE TABLE IF NOT EXISTS matches_to_users (
-        user varchar(128) foreign key references users(id),
-        field varchar(128) foreign key references fields(id)
+        user varchar(128) references users(id),
+        field varchar(128) references fields(id)
     );
     `)
 }
