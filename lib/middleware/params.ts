@@ -5,6 +5,7 @@ function checkParamsMiddleware(args: string[], validators: {[key: string]: (p: s
         let missingArgs: string[] = [];
         let invalidArgs: string[] = [];
         let source = req.body;
+        console.log(source);
         if (req.method === "GET" || req.method == "DELETE") {
             source = req.query;
         }

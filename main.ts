@@ -14,6 +14,6 @@ console.log("hot reloading!")
 import user from './lib/User'
 initTables().then(async _ => {
     console.log("create tabelle");
-    await user.create("nome", "cognome", "prova@prova.com", "prova", new Date())
+  //  await user.create("nome", "cognome", "prova@prova.com", "prova", new Date())
     console.log("fatto")
 });

@@ -1,7 +1,6 @@
 import express from 'express';
-const helmet = require('helmet');
-const fileUpload = require('express-fileupload');
-const body = require("body-parser");
+import helmet from 'helmet';
+import body from 'body-parser';
 import HTTPError from './HTTPError'
 
 export default class Router{
@@ -16,7 +15,6 @@ export default class Router{
     init(): void{
 
         this.app.use(helmet());
-        this.app.use(fileUpload({createParentPath: true, abortOnLimit: '20m', useTempFiles: true, tempFileDir: './tmp'}));
         this.app.enable("trust proxy");
         this.app.disable("x-powered-by");
         this.app.use(body.json({ limit: "20mb" }));
