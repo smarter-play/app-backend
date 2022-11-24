@@ -9,3 +9,4 @@ export function validateEmail(email: string): boolean {
 export async function checkPassword(hash: string, password: string): Promise<boolean> {
     return await argon2.verify(hash, password);
 }
+

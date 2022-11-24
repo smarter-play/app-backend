@@ -1,6 +1,7 @@
 import db from './db';
 import { nanoid } from 'nanoid'
 import argon2 from 'argon2';
+import jwt from 'jsonwebtoken';
 
 class User {
     id: string;
@@ -26,7 +27,7 @@ class User {
         let pw = await argon2.hash(password);
         console.log([ name, surname, email, pw, date_of_birth.toISOString().slice(0,10)]);
         return await db.query(
-            'INSERT INTO users(name, surname, email, password, date_of_birth) VALUES (?, ?, ?, ?, ?, ?)',
+            'INSERT INTO users(name, surname, email, password, date_of_birth) VALUES (?, ?, ?, ?, ?)',
             [name, surname, email, pw, date_of_birth.toISOString().slice(0,10)]
         );
         } catch(e) {console.log(e);}
@@ -39,7 +40,7 @@ class User {
 
     static async getAll(): Promise<User[]> {
         let result =  await db.query("SELECT id, name, surname, email, date_of_birth FROM users");
-        return result.map(el => new User(el.id, el.name, el.surname, el.email, new Date(el.date_of_birth)));
+        return result.results;
     }
 
     static async getById(id: string): Promise<User> {
@@ -50,8 +51,24 @@ class User {
 
     static async getByEmail(email: string): Promise<User> {
         let result =  await db.query("SELECT id, name, surname, email, date_of_birth, password FROM users WHERE email=?", [email]);
-        let el = result[0];
+        
+        if(result.results.length === 0) throw Error();
+        let el = result.results[0];
         return new User(el.id, el.name, el.surname, el.email, new Date(el.date_of_birth), el.password);
+    }
+
+    async generateJWT(): Promise<string> {
+        return await jwt.sign(this.schemaData, process.env.JWT_SIGNING_KEY);
+    }
+
+    get schemaData() {
+        return {
+            id: this.id,
+            email: this.email,
+            name: this.name,
+            surname: this.surname,
+            date_of_birth: this.date_of_birth,
+        }
     }
 
 

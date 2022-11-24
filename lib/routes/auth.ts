@@ -28,7 +28,7 @@ router.post('/login', checkParamsMiddleware(["email", "password"], {"email": val
         try {
             let user = await User.getByEmail(req.body["email"]);
             if(await checkPassword(user.password!, req.body["password"])) {
-                return res.status(200).send(JSON.stringify(user));
+                return res.status(200).send(await user.generateJWT());
             } else {
                 return res.status(401).send("Wrong password");
             }
