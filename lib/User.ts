@@ -61,6 +61,10 @@ class User {
         return await jwt.sign(this.schemaData, process.env.JWT_SIGNING_KEY);
     }
 
+    static async verifyJWT(token ): Promise<any> {
+        return jwt.verify(token, process.env.JWT_SIGNING_KEY);
+    }
+
     get schemaData() {
         return {
             id: this.id,

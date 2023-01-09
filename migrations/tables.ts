@@ -3,12 +3,13 @@ import db from "../lib/db";
 async function initTables() {
     await db.query(`
     CREATE TABLE IF NOT EXISTS users (
-        id int primary key AUTO_INCREMENT,
+        id INT NOT NULL AUTO_INCREMENT,
         name varchar(64) not null,
         surname varchar(64) not null,
         email varchar(50) not null unique,
         date_of_birth date not null,
-        password varchar(128) not null
+        password varchar(128) not null,
+        PRIMARY KEY(id)
     );
     
     CREATE TABLE IF NOT EXISTS courts (
@@ -33,7 +34,7 @@ async function initTables() {
     
     CREATE TABLE IF NOT EXISTS baskets (
         id int primary key,
-        court int references courts(id)
+        court int    courts(id)
     );
     
         

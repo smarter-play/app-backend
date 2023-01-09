@@ -4,6 +4,7 @@ import db from '../db'
 import checkParamsMiddleware from '../middleware/params'
 import {checkPassword, validateEmail} from '../utils';
 import User from '../User';
+import authMiddleware from '../middleware/auth';
 
 let router = express.Router();
 
@@ -39,5 +40,10 @@ router.post('/login', checkParamsMiddleware(["email", "password"], {"email": val
         }
     }
 )
+
+router.get('/', authMiddleware(), async(req: express.Request, res: express.Response) => {
+    let user_id = res.locals["user_id"];
+    return res.json(await User.getById(user_id))
+});
 
 export = router;

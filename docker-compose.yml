@@ -22,7 +22,7 @@ services:
     volumes:
       - smarterplay_mongo:/etc/mongo
   sql:
-    image: mariadb
+    image: mysql
     volumes:
       - smarterplay_sql:/var/lib/mysql
     env_file:
