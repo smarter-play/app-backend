@@ -43,7 +43,9 @@ router.post('/login', checkParamsMiddleware(["email", "password"], {"email": val
 
 router.get('/', authMiddleware(), async(req: express.Request, res: express.Response) => {
     let user_id = res.locals["user_id"];
-    return res.json(await User.getById(user_id))
+    console.log(user_id);
+    let result = await User.getById(user_id);
+    return res.status(result != null ? 200 : 404).json(result ?? "Not Found")
 });
 
 export = router;

@@ -4,7 +4,7 @@ import argon2 from 'argon2';
 import jwt from 'jsonwebtoken';
 
 class User {
-    id: string;
+    id: number;
     name: string;
     surname: string;
     email: string;
@@ -12,7 +12,7 @@ class User {
     password?: string;
     
 
-    constructor(id: string, name: string, surname: string, email: string, date_of_birth: Date, password?: string) {
+    constructor(id: number, name: string, surname: string, email: string, date_of_birth: Date, password?: string) {
         this.id = id;
         this.name = name;
         this.surname = surname;
@@ -34,19 +34,18 @@ class User {
         
     }
 
-    toJSON() {
-        // TODO:inmplement
-    }
 
     static async getAll(): Promise<User[]> {
         let result =  await db.query("SELECT id, name, surname, email, date_of_birth FROM users");
         return result.results;
     }
 
-    static async getById(id: string): Promise<User> {
+    static async getById(id: number): Promise<User | null> {
         let result =  await db.query("SELECT id, name, surname, email, date_of_birth FROM users WHERE id=?", [id]);
-        let el = result[0];
-        return new User(el.id, el.name, el.surname, el.email, new Date(el.date_of_birth));
+        console.log(result.results);
+        let el = result.results[0];
+        if(el == undefined) return null;
+        return el;
     }
 
     static async getByEmail(email: string): Promise<User> {
@@ -58,11 +57,11 @@ class User {
     }
 
     async generateJWT(): Promise<string> {
-        return await jwt.sign(this.schemaData, process.env.JWT_SIGNING_KEY);
+        return await jwt.sign(this.schemaData, process.env.JWT_SIGNING_KEY!);
     }
 
     static async verifyJWT(token ): Promise<any> {
-        return jwt.verify(token, process.env.JWT_SIGNING_KEY);
+        return jwt.verify(token, process.env.JWT_SIGNING_KEY!);
     }
 
     get schemaData() {

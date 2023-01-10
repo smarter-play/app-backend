@@ -8,8 +8,8 @@ router.get('/', async (req: express.Request, res: express.Response) => {
 })
 
 router.get('/:userId', async(req: express.Request, res: express.Response) => {
-    let userId = req.params.userId;
-
+    let userId = parseInt(req.params.userId);
+    console.log(userId);
     try {
         let user = await User.getById(userId);
         return res.send(user);
