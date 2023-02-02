@@ -13,6 +13,7 @@ services:
      vars.env
     volumes:
       - ./lib:/code/lib
+      - ./migrations:/code/migrations
   mongo:
     image: "mongo"
     ports:

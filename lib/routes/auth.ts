@@ -8,12 +8,16 @@ import authMiddleware from '../middleware/auth';
 
 let router = express.Router();
 
-router.post('/register', checkParamsMiddleware(["email", "password", "name", "surname", "date_of_birth", "password"], {
+const isValidIsoDate = (date: string) => {
+    return !isNaN(Date.parse(date));
+}
+
+router.post('/register', checkParamsMiddleware(["email", "password", "name", "surname", "date_of_birth"], {
     "email": validateEmail,
     "password": (arg: string) => arg.length > 4,
     "name": (arg: string) => arg.length < 64 && arg.length > 0,
     "surname": (arg: string) => arg.length < 64 && arg.length > 0,
-    "date_of_birth": (arg: string) => arg.length == 10,
+    "date_of_birth": isValidIsoDate,
 }), async (req: express.Request, res: express.Response) => {
     try {
         await User.create(req.body['name'], req.body['surname'], req.body['email'], req.body['password'], new Date(req.body['date_of_birth']));
@@ -46,6 +50,19 @@ router.get('/', authMiddleware(), async(req: express.Request, res: express.Respo
     console.log(user_id);
     let result = await User.getById(user_id);
     return res.status(result != null ? 200 : 404).json(result ?? "Not Found")
+});
+
+router.put('/', authMiddleware(), checkParamsMiddleware(["email", "name", "surname", "date_of_birth"], {
+    "email": validateEmail,
+    "name": (arg: string) => arg.length < 64 && arg.length > 0,
+    "surname": (arg: string) => arg.length < 64 && arg.length > 0,
+    "date_of_birth": isValidIsoDate,
+}), async(req: express.Request, res: express.Response) => {
+    let user_id = res.locals["user_id"];
+    console.log({user_id});
+    let user = await User.getById(user_id);
+    await user!.edit(req.body['name'], req.body['surname'], req.body['email'], new Date(req.body['date_of_birth']));
+    return res.status(user != null ? 200 : 404).send(user != null ? "success" : "error")
 });
 
 export = router;

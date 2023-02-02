@@ -35,6 +35,7 @@ class User {
     }
 
 
+
     static async getAll(): Promise<User[]> {
         let result =  await db.query("SELECT id, name, surname, email, date_of_birth FROM users");
         return result.results;
@@ -42,10 +43,9 @@ class User {
 
     static async getById(id: number): Promise<User | null> {
         let result =  await db.query("SELECT id, name, surname, email, date_of_birth FROM users WHERE id=?", [id]);
-        console.log(result.results);
         let el = result.results[0];
         if(el == undefined) return null;
-        return el;
+        return new User(id, el.name, el.surname, el.email, new Date(el.date_of_birth));
     }
 
     static async getByEmail(email: string): Promise<User> {
@@ -58,6 +58,13 @@ class User {
 
     async generateJWT(): Promise<string> {
         return await jwt.sign(this.schemaData, process.env.JWT_SIGNING_KEY!);
+    }
+
+    async edit(name: string, surname: string, email: string, date_of_birth: Date): Promise<void> {
+        return await db.query(
+            'UPDATE users SET name=?, surname=?, email=?, date_of_birth=? WHERE id=?',
+            [name, surname, email, date_of_birth.toISOString().slice(0,10), this.id]
+        );
     }
 
     static async verifyJWT(token ): Promise<any> {
