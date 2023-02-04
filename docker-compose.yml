@@ -16,14 +16,14 @@ services:
       - ./migrations:/code/migrations
   mongo:
     image: "mongo"
-    ports:
-      - 27017:27017
     env_file:
       vars.env
     volumes:
       - smarterplay_mongo:/etc/mongo
   sql:
     image: mysql
+    ports:
+      - 3306:3306
     volumes:
       - smarterplay_sql:/var/lib/mysql
     env_file:

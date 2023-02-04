@@ -37,12 +37,12 @@ class User {
 
 
     static async getAll(): Promise<User[]> {
-        let result =  await db.query("SELECT id, name, surname, email, date_of_birth FROM users");
+        let result =  await db.query("SELECT id, name, surname, email, date_of_birth, score FROM users ORDER BY score DESC");
         return result.results;
     }
 
     static async getById(id: number): Promise<User | null> {
-        let result =  await db.query("SELECT id, name, surname, email, date_of_birth FROM users WHERE id=?", [id]);
+        let result =  await db.query("SELECT id, name, surname, email, date_of_birth, score FROM users WHERE id=?", [id]);
         let el = result.results[0];
         if(el == undefined) return null;
         return new User(id, el.name, el.surname, el.email, new Date(el.date_of_birth));
