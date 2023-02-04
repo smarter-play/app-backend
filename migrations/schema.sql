@@ -40,3 +40,28 @@ CREATE TABLE IF NOT EXISTS baskets (
     id int primary key AUTO_INCREMENT,
     court int references courts(id)
 );    
+
+CREATE TABLE IF NOT EXISTS accelerometer_data(
+    id int primary key AUTO_INCREMENT,
+    basket_id int not null,
+    accel_x float not null,
+    accel_y float not null,
+    accel_z float not null,
+    gyro_x float not null,
+    gyro_y float not null,
+    gyro_z float not null,
+    temperature float not null,
+    timestamp timestamp not null
+);
+
+CREATE TABLE IF NOT EXISTS basket_data(
+    id int primary key AUTO_INCREMENT,
+    basket_id int not null,
+    timestamp timestamp not null
+);
+
+CREATE TABLE IF NOT EXISTS people_detected_data(
+    id int primary key AUTO_INCREMENT,
+    basket_id int not null,
+    timestamp timestamp not null
+);
