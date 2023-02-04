@@ -15,7 +15,6 @@ async function initTables() {
     
     CREATE TABLE IF NOT EXISTS courts (
         id int not null AUTO_INCREMENT,
-        address varchar(128) not null,
         lat double not null,
         lon double not null,
         PRIMARY KEY(id)
