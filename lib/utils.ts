@@ -10,3 +10,6 @@ export async function checkPassword(hash: string, password: string): Promise<boo
     return await argon2.verify(hash, password);
 }
 
+export function checkNumeric(value: string): boolean {
+    return !isNaN(Number(value));
+}
