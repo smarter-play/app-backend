@@ -41,7 +41,7 @@ async function initTables() {
     );
     
     CREATE TABLE IF NOT EXISTS baskets (
-        id int primary key AUTO_INCREMENT,
+        id int primary key,
         court int references courts(id)
     );    
     

@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS games_to_users (
 );
 
 CREATE TABLE IF NOT EXISTS baskets (
-    id int primary key AUTO_INCREMENT,
+    id int primary key,
     court int references courts(id)
 );    
 
