@@ -29,17 +29,25 @@ CREATE TABLE IF NOT EXISTS classic_games (
     score2 int not null default 0
 );
 
-CREATE TABLE IF NOT EXISTS games_to_users (
-    user int not null references users(id),
-    game int not null references games(id),
-    team tinyint not null,
-    primary key(user, game)
-);
-
 CREATE TABLE IF NOT EXISTS baskets (
     id int primary key,
     court int references courts(id)
 );    
+
+CREATE TABLE IF NOT EXISTS simple_games {
+    id int references games(id),
+    basket int not null references baskets(id),
+    score1 int not null default 0,
+    score2 int not null default 0,
+    created_at timestamp not null default now()
+}
+
+CREATE TABLE IF NOT EXISTS games_to_users (
+    user int not null references users(id),
+    game int not null references simple_games(id),
+    team tinyint not null,
+    primary key(user, game)
+);
 
 CREATE TABLE IF NOT EXISTS accelerometer_data(
     id int primary key AUTO_INCREMENT,
