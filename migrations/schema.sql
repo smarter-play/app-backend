@@ -34,13 +34,13 @@ CREATE TABLE IF NOT EXISTS baskets (
     court int references courts(id)
 );    
 
-CREATE TABLE IF NOT EXISTS simple_games {
+CREATE TABLE IF NOT EXISTS simple_games (
     id int references games(id),
     basket int not null references baskets(id),
     score1 int not null default 0,
     score2 int not null default 0,
     created_at timestamp not null default now()
-}
+);
 
 CREATE TABLE IF NOT EXISTS games_to_users (
     user int not null references users(id),
