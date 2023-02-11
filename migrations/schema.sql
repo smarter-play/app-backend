@@ -62,7 +62,7 @@ CREATE TABLE IF NOT EXISTS accelerometer_data(
     timestamp timestamp not null
 );
 
-CREATE TABLE IF NOT EXISTS basket_data(
+CREATE TABLE IF NOT EXISTS score_data(
     id int primary key AUTO_INCREMENT,
     basket_id int not null,
     timestamp timestamp not null

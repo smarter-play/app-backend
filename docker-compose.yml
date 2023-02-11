@@ -25,5 +25,7 @@ services:
     volumes:
       - ./lib:/code/lib
       - ./migrations:/code/migrations
+  redis:
+    image: redis
 volumes:
   smarterplay_sql:
