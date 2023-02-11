@@ -1,8 +1,7 @@
-import {createCLient} from 'redis';
+import {createClient} from 'redis';
 
 const client = createClient({
-    host: 'redis',
-    port: 6379,
+    url: 'redis://redis:6379',
 });
 
 export const setHasScored = async (game_id: number) => {
