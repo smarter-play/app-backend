@@ -1,11 +1,15 @@
 import * as express from 'express';
 import Game from '../Game';
+import HTTPError from '../HTTPError';
 import checkParamsMiddleware from '../middleware/params';
 import { checkNumeric } from '../utils';
 
 let router = express.Router();
 
-router.post('/', checkParamsMiddleware([], {"range": checkNumeric, "lat": checkNumeric, "lon": checkNumeric}), async (req: express.Request, res: express.Response) => {
+router.post('/', checkParamsMiddleware(["basket"], {
+    basket: checkNumeric,
+}), async (req: express.Request, res: express.Response) => {
+    await Game.create(parseInt(req.body.basket), 0, 0);
     
 })
 

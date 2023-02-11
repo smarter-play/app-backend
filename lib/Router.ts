@@ -23,9 +23,14 @@ export default class Router{
         );
         this.app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
             res.header("Access-Control-Allow-Origin", "*");
-            res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+            res.header('Access-Control-Allow-Methods', '*');
+            res.header('Access-Control-Allow-Headers', '*');
             console.log(`${req.method} ${req.path}`);
-            next();
+            try {
+                next();
+            } catch (e) {
+                return res.status(500).send({ error: "Unknown Error" });
+            }
         })
         this.app.use('/', require("./routes/main"));
         this.app.use('/auth', require("./routes/auth"));
