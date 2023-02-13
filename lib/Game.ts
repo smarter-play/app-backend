@@ -1,5 +1,8 @@
-import db from './db';
+import db, { connectionQuery } from './db';
 import HTTPError from './HTTPError';
+import { resetBasket } from './redis';
+import Basket from './Basket';
+import { Connection } from 'mysql2';
 
 class Game {
     id: number;
@@ -17,16 +20,44 @@ class Game {
         this.created_at = created_at;
     }
 
-    static async create(basket: number, score1: number, score2: number): Promise<void> {
-        let res = await db.query(`INSERT INTO games VALUES ()`);
+    static async create(basket: number, score1?: number, score2?: number): Promise<number> {
+        score1 = score1 ?? 0;
+        score2 = score2 ?? 0;
+        let conn = db.getConnection();
+        try {
+            let res = await connectionQuery(conn, `INSERT INTO games VALUES ()`);
+            let id = res.results.insertId;
 
+            
+            await connectionQuery(conn,
+                'INSERT INTO simple_games(id, basket, score1, score2) VALUES (?, ?, ?, ?)',
+                [id, basket, score1, score2]
+            );
+            
+            let teams = await Basket.getTeams(basket);
 
-        let id = res.results.insertId;
+            for(let user of teams.team1) {
+                await Game.addUser(id, user.id, 1, conn);
+            }
 
-        
-        return await db.query(
-            'INSERT INTO simple_games(id, basket, score1, score2) VALUES (?, ?, ?, ?)',
-            [id, basket, score1, score2]
+            for(let user of teams.team2) {
+                await Game.addUser(id, user.id, 2, conn);
+            }
+            conn.release();
+            await resetBasket(basket);
+            return id;
+        } catch(e) {
+            conn.rollback(() => conn.release());
+            throw new HTTPError("Error while creating game", 500);
+        }
+            
+
+    }
+
+    static async addUser(game_id: number, user_id: number, team: number, conn: Connection): Promise<void> {
+        return await connectionQuery(conn,
+            'INSERT INTO games_to_users(game, user, team) VALUES (?, ?, ?)',
+            [game_id, user_id, team]
         );
     }
 
@@ -66,6 +97,11 @@ class Game {
             'INSERT INTO people_detected(basket) VALUES (?)',
             [basket_id]
         );
+    }
+
+    static async addToTeam(team: number, basket_id: number): Promise<void> {
+        if(team != 1 && team != 2) throw new HTTPError( "Team must be 1 or 2", 400);
+        
     }
 
 

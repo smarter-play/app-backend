@@ -1,4 +1,4 @@
-import mysql, { Pool, createPool, OkPacket } from "mysql2";
+import mysql, { Pool, createPool, OkPacket, Connection } from "mysql2";
 
 class Db {
     pool: Pool | undefined = undefined;
@@ -34,6 +34,36 @@ class Db {
             });
         });
     }
+
+    getConnection(): any {
+        return new Promise((resolve, reject) => {
+            this.pool!.getConnection(function (err, conn) {
+                if (err)
+                    return reject(err);
+                
+                return resolve(conn);
+            });
+        });
+    }
+
+    
+}
+
+export const  connectionQuery = async (conn: Connection, query: string, options: any = {}, buffered_results: boolean = false): Promise<any> =>{
+    return new Promise((resolve, reject) => {
+        conn.query(query, options, function (err, results, fields) {
+            if (err)
+                return reject(err);
+            
+            if(buffered_results)
+                results = debufferize(results as any);
+
+            return resolve({
+                results,
+                fields
+            });
+        });
+    });
 }
 
 export default new Db();

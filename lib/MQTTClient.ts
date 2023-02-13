@@ -26,9 +26,11 @@ export default class MQTTClient{
             
             console.log('Received message from topic:', topic);
             message = JSON.parse(message.toString());
+            console.log(message);
 
+            /* codice inutilizzato e che rompe tutto per ora
             const basket_id = message.metadata[0];
-            const hasGame = Game.checkIfBasketHasGame(basket_id);
+            const hasGame = Game.checkIfBasketHasGame(basket_id);*/
 
             switch(message.type){
                 case "SCORE":

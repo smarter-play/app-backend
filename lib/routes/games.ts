@@ -9,8 +9,9 @@ let router = express.Router();
 router.post('/', checkParamsMiddleware(["basket"], {
     basket: checkNumeric,
 }), async (req: express.Request, res: express.Response) => {
-    await Game.create(parseInt(req.body.basket), 0, 0);
+    await Game.create(parseInt(req.body.basket));
     
 })
+
 
 export = router;
