@@ -24,7 +24,23 @@ export const resetHasScored = async (game_id: number) => {
 
 export const addToTeam = async (basket_id: number, team: number, user_id: number) => {
     if(team != 1 && team != 2) throw new HTTPError("Team must be 1 or 2", 400);
+    
+    // check if user is already in a team and delete its entry
+    let team1 = await getTeam(basket_id, 1);
+    let team2 = await getTeam(basket_id, 2);
+
+    if(team1.includes(user_id)) {
+        await removeFromTeam(basket_id, 1, user_id);
+    } else if(team2.includes(user_id)) {
+        await removeFromTeam(basket_id, 2, user_id);
+    }
+
     await client.lPush(`basket:${basket_id}:team:${team}`, `${user_id}`);
+}
+
+export const removeFromTeam = async (basket_id: number, team: number, user_id: number) => {
+    if(team != 1 && team != 2) throw new HTTPError("Team must be 1 or 2", 400);
+    await client.lRem(`basket:${basket_id}:team:${team}`, 0, `${user_id}`);
 }
 
 export const getTeam = async (basket_id: number, team: number): Promise<number[]> => {
@@ -33,9 +49,10 @@ export const getTeam = async (basket_id: number, team: number): Promise<number[]
     return raw.map((x) => parseInt(x));
 }
 
-export const setReady = async (basket_id: number, team: number, user: number) => {
+export const setReady = async (basket_id: number, team: number, user: number, ready: string) => {
     if(team != 1 && team != 2) throw new HTTPError("Team must be 1 or 2", 400);
-    await client.set(`basket:${basket_id}:team:${team}:user:${user}:ready`, '1');
+    if (ready != '1' && ready != '0') throw new HTTPError("Ready must be 1 or 0", 400);
+    await client.set(`basket:${basket_id}:team:${team}:user:${user}:ready`, ready);
 }
 
 export const getReady = async (basket_id: number): Promise<boolean> => {

@@ -28,13 +28,15 @@ router.post('/:basketId/players', authMiddleware(), checkParamsMiddleware(["team
     return res.send("OK");
 });
 
-router.put('/:basketId/:teamId/ready', authMiddleware(), async (req: express.Request, res: express.Response) => {
+router.put('/:basketId/:teamId/ready', authMiddleware(), checkParamsMiddleware(["ready"], {
+    ready: (ready: string) => ready == "1" || ready == "0",
+}), async (req: express.Request, res: express.Response) => {
     let user = res.locals.user_id;
     let basket = parseInt(req.params.basketId);
-
+    let ready = req.body.ready;
     let team = parseInt(req.params.teamId);
 
-    await setReady(basket, team, user);
+    await setReady(basket, team, user, ready);
     if(await getReady(basket)) {
         await Basket.startGame(basket);
     }

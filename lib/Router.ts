@@ -37,6 +37,7 @@ export default class Router{
         this.app.use('/users', require("./routes/users"));
         this.app.use('/courts', require("./routes/courts"));
         this.app.use('/games', require("./routes/games"));
+        this.app.use('/baskets', require("./routes/baskets"));
         
         this.app.listen(process.env.PORT);
 
