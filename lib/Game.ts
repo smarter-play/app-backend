@@ -54,6 +54,24 @@ class Game {
 
     }
 
+    static async getById(id: number): Promise<Game | null> {
+        let result =  await db.query("SELECT id, basket, score1, score2, created_at FROM simple_games WHERE id=?", [id]);
+        let el = result.results[0];
+        if(el == undefined) return null;
+        return new Game(id, el.basket, el.score1, el.score2, el.created_at);
+    }
+
+    static async getByUserId(user_id: number): Promise<Game[]> {
+        let result =  await db.query(`
+            SELECT id, basket, score1, score2, created_at
+            FROM simple_games
+            WHERE id IN (
+                SELECT game FROM games_to_users WHERE user=?
+            )
+            `, [user_id]);
+        return result.results;
+    }
+
     static async addUser(game_id: number, user_id: number, team: number, conn: Connection): Promise<void> {
         return await connectionQuery(conn,
             'INSERT INTO games_to_users(game, user, team) VALUES (?, ?, ?)',
