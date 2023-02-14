@@ -4,16 +4,41 @@ import authMiddleware from '../middleware/auth';
 import checkParamsMiddleware from '../middleware/params';
 import { checkNumeric } from '../utils';
 import { addToTeam, setReady, getReady } from '../redis';
+import { getCurrentOccupation, forecastOccupation } from '../occupation';
 
 let router = express.Router();
 
 router.get('/', checkParamsMiddleware([], {"range": checkNumeric, "lat": checkNumeric, "lon": checkNumeric}),
 async (req: express.Request, res: express.Response) => {
     if(req.query.range && req.query.lat && req.query.lon) {
-        return res.send(await Basket.getInRange(parseFloat(req.query.lat as string), parseFloat(req.query.lon as string), parseFloat(req.query.range as string)));
+        let baskets = await Basket.getInRange(parseFloat(req.query.lat as string), parseFloat(req.query.lon as string), parseFloat(req.query.range as string))
+        let basketsWithOccupation = await Promise.all(baskets.map(async (basket) => {
+            let occupation = await getCurrentOccupation(basket.id);
+            return {
+                ...basket,
+                occupation
+            }
+        }));
+
+        return res.json(basketsWithOccupation);
     } else {
-        return res.send(await Basket.getAll());
+        return res.json(await Basket.getAll());
     }
+})
+
+router.get('/:basketId/forecast', checkParamsMiddleware(["time"], {}), async (req: express.Request, res: express.Response) => {
+    let basketId = parseInt(req.params.basketId);
+    let time = new Date(req.query.time as string);
+
+    let basket = await Basket.getById(basketId); // switch to calculating history days from basket data
+
+    let history_days = 30;
+
+    let occupation = await forecastOccupation(basketId, time, history_days);
+
+    return res.send({
+        occupation
+    });
 })
 
 router.post('/:basketId/players', authMiddleware(), checkParamsMiddleware(["team"], {

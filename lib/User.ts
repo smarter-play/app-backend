@@ -7,14 +7,16 @@ class User {
     name: string;
     surname: string;
     email: string;
+    score: number;
     date_of_birth: Date;
     password?: string;
     
 
-    constructor(id: number, name: string, surname: string, email: string, date_of_birth: Date, password?: string) {
+    constructor(id: number, name: string, surname: string, email: string, date_of_birth: Date, score: number, password?: string) {
         this.id = id;
         this.name = name;
         this.surname = surname;
+        this.score = score;
         this.email = email;
         this.password = password;
         this.date_of_birth = date_of_birth;
@@ -44,15 +46,15 @@ class User {
         let result =  await db.query("SELECT id, name, surname, email, date_of_birth, score FROM users WHERE id=?", [id]);
         let el = result.results[0];
         if(el == undefined) return null;
-        return new User(id, el.name, el.surname, el.email, new Date(el.date_of_birth));
+        return new User(id, el.name, el.surname, el.email, new Date(el.date_of_birth), el.score);
     }
 
     static async getByEmail(email: string): Promise<User> {
-        let result =  await db.query("SELECT id, name, surname, email, date_of_birth, password FROM users WHERE email=?", [email]);
+        let result =  await db.query("SELECT id, name, surname, email, date_of_birth, score, password FROM users WHERE email=?", [email]);
         
         if(result.results.length === 0) throw Error();
         let el = result.results[0];
-        return new User(el.id, el.name, el.surname, el.email, new Date(el.date_of_birth), el.password);
+        return new User(el.id, el.name, el.surname, el.email, new Date(el.date_of_birth), el.score, el.password);
     }
 
     async generateJWT(): Promise<string> {

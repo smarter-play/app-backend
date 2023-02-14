@@ -59,7 +59,7 @@ class Game {
 
     static async getById(id: number): Promise<Game | null> {
         let result =  await db.query(`
-            SELECT id, basket, score1, score2, created_at
+            SELECT simple_games.id, basket, score1, score2, created_at, users.id, users.name, users.email, users.password, users.created_at, users.score
             FROM simple_games
             JOIN games_to_users ON games_to_users.game=simple_games.id
             JOIN users ON users.id=games_to_users.user
@@ -70,7 +70,7 @@ class Game {
 
         let users: User[] = [];
         for(let user of result.results) {
-            users.push(new User(user.id, user.name, user.email, user.password, user.created_at));
+            users.push(new User(user.id, user.name, user.email, user.password, user.created_at, user.score));
         }
         return new Game(id, el.basket, el.score1, el.score2, users, el.created_at);
     }
