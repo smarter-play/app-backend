@@ -61,27 +61,33 @@ class Game {
         );
     }
 
-    static async getByBasketId(basket_id: number): Promise<Game[]> {
-        let result =  await db.query("SELECT id, basket, score1, score2, created_at FROM simple_games WHERE basket=?", [basket_id]);
-        return result.results;
+    static async getGameByBasketId(basket_id: number): Promise<Game[]> {
+        let results = db.query("SELECT id, basket, score1, score2, created_at FROM simple_games WHERE basket=?", [basket_id]);
+        return results.results;
     }
 
     static async checkIfBasketHasGame(basket_id: number): Promise<boolean> {
-        let result =  await db.query("SELECT id, basket, score1, score2, created_at FROM simple_games WHERE basket=? AND score1=0 AND score2=0", [basket_id]);
+        let result =  await db.query("SELECT id, basket, score1, score2, created_at FROM simple_games WHERE basket=?", [basket_id]);
         return result.results.length > 0;
     }
 
-    static async insertScoreData(basket_id: number): Promise<void> {
-        return await db.query(
-            'INSERT INTO score_data(basket) VALUES (?)',
-            [basket_id]
+    static async insertScoreData(basket_id: number, timestamp: Date): Promise<void> {
+        await db.query(
+            'INSERT INTO score_data(basket_id, timestamp) VALUES (?, ?)',
+            [basket_id, timestamp]
         );
+
+        await db.query(
+            'UPDATE simple_games SET created_at=? WHERE basket=?',
+            [timestamp, basket_id]
+        );
+
     }
 
-    static async insertAccelerometerData(basket_id: number, acc_x: number, acc_y: number, acc_z: number, gyro_x: number, gyro_y: number, gyro_z: number, temperature: number): Promise<void> {
+    static async insertAccelerometerData(basket_id: number, acc_x: number, acc_y: number, acc_z: number, gyro_x: number, gyro_y: number, gyro_z: number, temperature: number, timestamp: Date): Promise<void> {
         return await db.query(
-            'INSERT INTO accelerometer_data(basket, acc_x, acc_y, acc_z, gyro_x, gyro_y, gyro_z, temperature) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-            [basket_id, acc_x, acc_y, acc_z, gyro_x, gyro_y, gyro_z, temperature]
+            'INSERT INTO accelerometer_data(basket_id, accel_x, accel_y, accel_z, gyro_x, gyro_y, gyro_z, temperature, timestamp) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [basket_id, acc_x, acc_y, acc_z, gyro_x, gyro_y, gyro_z, temperature, timestamp]
         );
     }
 
