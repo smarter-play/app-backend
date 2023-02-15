@@ -5,6 +5,8 @@ const client = createClient({
     url: `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`,
 });
 
+client.connect();
+
 // MQTT state machine
 
 export const setHasScored = async (game_id: number) => {
