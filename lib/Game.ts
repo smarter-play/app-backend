@@ -99,9 +99,13 @@ class Game {
         return results.results;
     }
 
-    static async checkIfBasketHasGame(basket_id: number): Promise<boolean> {
-        let result =  await db.query("SELECT id, basket, score1, score2, created_at FROM simple_games WHERE basket=?", [basket_id]);
-        return result.results.length > 0;
+    static async checkIfBasketExists(basket_id: number): Promise<boolean> {
+        let results = await db.query("SELECT id FROM baskets WHERE id=?", [basket_id]);
+        return results.results.length > 0;
+    }
+
+    static async createBasket(basket_id: number, court: number): Promise<void> {
+        await db.query("INSERT INTO baskets(id, court) VALUES (?, ?)", [basket_id, court]);
     }
 
     static async insertScoreData(basket_id: number, timestamp: Date): Promise<void> {
@@ -110,10 +114,10 @@ class Game {
             [basket_id, timestamp]
         );
 
-        await db.query(
+        /* await db.query(
             'UPDATE simple_games SET created_at=? WHERE basket=?',
             [timestamp, basket_id]
-        );
+        ); */
 
     }
 
@@ -124,17 +128,17 @@ class Game {
         );
     }
 
+    static async insertPeopleDetected(basket_id: number, timestamp: Date): Promise<void> {
+        return await db.query(
+            'INSERT INTO people_detected_data(basket_id, timestamp) VALUES (?, ?)',
+            [basket_id, timestamp]
+        );
+    }
+
     static async updateScore(basket_id: number, score1: number, score2: number): Promise<void> {
         return await db.query(
             'UPDATE simple_games SET score1=?, score2=? WHERE basket=?',
             [score1, score2, basket_id]
-        );
-    }
-
-    static async insertPeopleDetected(basket_id: number): Promise<void> {
-        return await db.query(
-            'INSERT INTO people_detected(basket) VALUES (?)',
-            [basket_id]
         );
     }
 

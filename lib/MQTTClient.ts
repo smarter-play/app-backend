@@ -27,18 +27,30 @@ export default class MQTTClient{
             console.log('Received message from topic:', topic);
             message = JSON.parse(message.toString());
 
+            const basket_id = message.metadata[0] >>> 0;
+            Game.checkIfBasketExists(basket_id).then((exists: boolean) => {
+                if(!exists){
+                    // HARDCODED COURT
+                    Game.createBasket(basket_id, 1).catch((err: any) => {
+                        console.log(err);
+                    });
+                }
+            }).catch((err: any) => {
+                console.log(err);
+            });
+
             switch(message.type){
                 case "SCORE":
-                    this.on_score(message);
+                    this.on_score(message, basket_id);
                     break;
                 case "ACCELEROMETER":
-                    this.on_accelerometer(message);
+                    this.on_accelerometer(message, basket_id);
                     break;
                 case "CUSTOM_BUTTON":
-                    this.on_custom_button(message);
+                    this.on_custom_button(message, basket_id);
                     break;
                 case "PEOPLE_DETECTED":
-                    this.on_people_detected(message);
+                    this.on_people_detected(message, basket_id);
                     break;
                 case "INFO":
                     this.on_info(message);
@@ -50,22 +62,33 @@ export default class MQTTClient{
 
     }
 
-    async on_score(message: any): Promise<void>{
-        const basket_id = message.metadata[0] >>>0;
+    async on_score(message: any, basket_id: number): Promise<void>{
 
         const timestamp = new Date(message.timestamp * 1000);
         console.log("SCORE: received from basket " + basket_id);
-    
-        Game.insertScoreData(basket_id, timestamp).catch((err: any) => {
+
+        // check on redis if game is in running game
+        await redis.getRunningGames().then(async (runningGames: number[]) => {
+            // if basket_id is not in running games, add it
+            if (!runningGames.includes(basket_id)) {
+                await redis.addRunningGame(basket_id);
+                await Game.create(basket_id).catch((err: any) => {
+                    console.log(err);
+                });
+            };
+        }).catch((err: any) => {
             console.log(err);
         });
-
+        
         // setta in redis che è stato fatto un canestro
         await redis.setHasScored(basket_id);
+    
+        await Game.insertScoreData(basket_id, timestamp).catch((err: any) => {
+            console.log(err);
+        });        
     }
 
-    on_accelerometer(message: any): void{
-        const basket_id = message.metadata[0] >>>0;
+    async on_accelerometer(message: any, basket_id: number): Promise<void>{
         const acc_x = message.metadata[1];
         const acc_y = message.metadata[2];
         const acc_z = message.metadata[3];
@@ -77,14 +100,13 @@ export default class MQTTClient{
 
         console.log("ACCELEROMETER: received from basket " + basket_id);
 
-        Game.insertAccelerometerData(basket_id, acc_x, acc_y, acc_z, gyro_x, gyro_y, gyro_z, temp, timestamp).catch((err: any) => {
+        await Game.insertAccelerometerData(basket_id, acc_x, acc_y, acc_z, gyro_x, gyro_y, gyro_z, temp, timestamp).catch((err: any) => {
             console.log(err);
         });
 
     }
 
-    async on_custom_button(message: any): Promise<void>{
-        const basket_id = message.metadata[0] >>> 0;
+    async on_custom_button(message: any, basket_id: number): Promise<void>{
         const button_id = message.metadata[1][0];
 
         // controlla in redis se è stato fatto un canestro,
@@ -93,6 +115,16 @@ export default class MQTTClient{
         await redis.getHasScored(basket_id).then(async (hasScored: boolean) => {
             if (!hasScored) return;
 
+            // controlla in redis che il gioco sia in running game
+            // altrimenti si riferisce ad un partita già conclusa
+            await redis.getRunningGames().then(async (runningGames: number[]) => {
+                // if basket_id is not in running games, add it
+                if (!runningGames.includes(basket_id)) return;
+            }).catch((err: any) => {
+                console.log(err);
+            });
+
+            // controlla che esista un gioco con quel basket_id
             const game = await Game.getGameByBasketId(basket_id).catch((err: any) => {
                 console.log(err);
             });
@@ -124,11 +156,14 @@ export default class MQTTClient{
         console.log("CUSTOM_BUTTON: received from basket " + basket_id + " button " + button_id)
     }
 
-    on_people_detected(message: any): void{
-        const basket_id = message.metadata[0] >>>0;
+    async on_people_detected(message: any, basket_id: number): Promise<void>{
         console.log("PEOPLE_DETECTED: received from basket " + basket_id);
+        const timestamp = new Date(message.timestamp * 1000);
 
-        // Game.insertPeopleDetected(basket_id);
+
+        await Game.insertPeopleDetected(basket_id, timestamp).catch((err: any) => {
+            console.log(err);
+        });
     }
 
     on_info(message: any): void{
