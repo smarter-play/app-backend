@@ -3,20 +3,23 @@ import HTTPError from './HTTPError';
 import { resetBasket } from './redis';
 import Basket from './Basket';
 import { Connection } from 'mysql2';
+import User from './User';
 
 class Game {
     id: number;
     basket: number;
     score1: number;
     score2: number;
+    users: User[];
     created_at: Date;
     
 
-    constructor(id: number, basket: number, score1: number, score2: number, created_at: Date) {
+    constructor(id: number, basket: number, score1: number, score2: number, users: User[], created_at: Date) {
         this.id = id;
         this.basket = basket;
         this.score1 = score1;
         this.score2 = score2;
+        this.users = users;
         this.created_at = created_at;
     }
 
@@ -52,6 +55,35 @@ class Game {
         }
             
 
+    }
+
+    static async getById(id: number): Promise<Game | null> {
+        let result =  await db.query(`
+            SELECT simple_games.id, basket, score1, score2, created_at, users.id, users.name, users.email, users.password, users.created_at, users.score
+            FROM simple_games
+            JOIN games_to_users ON games_to_users.game=simple_games.id
+            JOIN users ON users.id=games_to_users.user
+            WHERE id=?`,
+        [id]);
+        let el = result.results[0];
+        if(el == undefined) return null;
+
+        let users: User[] = [];
+        for(let user of result.results) {
+            users.push(new User(user.id, user.name, user.email, user.password, user.created_at, user.score));
+        }
+        return new Game(id, el.basket, el.score1, el.score2, users, el.created_at);
+    }
+
+    static async getByUserId(user_id: number): Promise<Game[]> {
+        let result =  await db.query(`
+            SELECT id, basket, score1, score2, created_at
+            FROM simple_games
+            WHERE id IN (
+                SELECT game FROM games_to_users WHERE user=?
+            )
+            `, [user_id]);
+        return result.results;
     }
 
     static async addUser(game_id: number, user_id: number, team: number, conn: Connection): Promise<void> {

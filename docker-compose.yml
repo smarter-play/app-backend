@@ -27,5 +27,13 @@ services:
       - ./migrations:/code/migrations
   redis:
     image: redis
+  occupation_eval:
+    image: carminezacc/smarterplay-occupation-evaluator
+    depends_on:
+      sql:
+        condition: service_healthy
+
+    env_file:
+      occupation.env
 volumes:
   smarterplay_sql:

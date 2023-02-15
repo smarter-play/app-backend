@@ -7,6 +7,21 @@ const client = createClient({
 
 client.connect();
 
+// general
+
+export const getRunningGames = async (): Promise<number[]> => {
+    let raw = await client.lRange('running_games', 0, -1);
+    return raw.map((el) => parseInt(el));
+}
+
+export const addRunningGame = async (game_id: number) => {
+    await client.lPush('running_games', `${game_id}`);
+}
+
+export const endGame = async (game_id: number) => {
+    await client.lRem('running_games', 0, `${game_id}`);
+}
+
 // MQTT state machine
 
 export const setHasScored = async (game_id: number) => {
