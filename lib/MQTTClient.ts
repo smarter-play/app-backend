@@ -117,12 +117,15 @@ export default class MQTTClient{
 
             // controlla in redis che il gioco sia in running game
             // altrimenti si riferisce ad un partita già conclusa
-            await redis.getRunningGames().then(async (runningGames: number[]) => {
-                // if basket_id is not in running games, add it
+
+            try {
+                let runningGames: number[] = await redis.getRunningGames();
+                    // if basket_id is not in running games, add it
                 if (!runningGames.includes(basket_id)) return;
-            }).catch((err: any) => {
+            } catch(err: any) {
                 console.log(err);
-            });
+            }
+        
 
             // controlla che esista un gioco con quel basket_id
             const game = await Game.getGameByBasketId(basket_id).catch((err: any) => {
