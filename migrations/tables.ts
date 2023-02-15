@@ -32,20 +32,20 @@ async function initTables() {
         score1 int not null default 0,
         score2 int not null default 0
     );
-
+    
     CREATE TABLE IF NOT EXISTS baskets (
-        id int primary key,
+        id int unsigned primary key,
         court int references courts(id)
     );    
-
+    
     CREATE TABLE IF NOT EXISTS simple_games (
         id int references games(id),
-        basket int not null references baskets(id),
+        basket int unsigned not null references baskets(id),
         score1 int not null default 0,
         score2 int not null default 0,
         created_at timestamp not null default now()
     );
-
+    
     CREATE TABLE IF NOT EXISTS games_to_users (
         user int not null references users(id),
         game int not null references simple_games(id),
@@ -55,7 +55,7 @@ async function initTables() {
     
     CREATE TABLE IF NOT EXISTS accelerometer_data(
         id int primary key AUTO_INCREMENT,
-        basket_id int not null,
+        basket_id int unsigned not null,
         accel_x float not null,
         accel_y float not null,
         accel_z float not null,
@@ -68,13 +68,13 @@ async function initTables() {
     
     CREATE TABLE IF NOT EXISTS score_data(
         id int primary key AUTO_INCREMENT,
-        basket_id int not null,
+        basket_id int unsigned not null,
         timestamp timestamp not null
     );
     
     CREATE TABLE IF NOT EXISTS people_detected_data(
         id int primary key AUTO_INCREMENT,
-        basket_id int not null,
+        basket_id int unsigned not null,
         timestamp timestamp not null
     );
     `)
