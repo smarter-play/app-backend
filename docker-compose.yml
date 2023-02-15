@@ -29,10 +29,11 @@ services:
     image: redis
   occupation_eval:
     image: carminezacc/smarterplay-occupation-evaluator
+    ports:
+      - 5556:5555
     depends_on:
       sql:
         condition: service_healthy
-
     env_file:
       occupation.env
 volumes:

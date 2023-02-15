@@ -4,7 +4,12 @@ let client = axios.create({
     baseURL: `${process.env.OCCUPATION_PREDICTOR_HOST}:${process.env.OCCUPATION_PREDICTOR_PORT}`,
 });
 
-export const getCurrentOccupation = async (basket: number): Promise<number> => {
+export const getCurrentOccupation = async (basket: number): Promise<{[key: string]: any}> => {
+    console.log({
+        basket,
+        t: new Date().toISOString()
+    });
+    
     let res = await client.get(`/api/occupation`, {
         params: {
             basket,
@@ -14,7 +19,7 @@ export const getCurrentOccupation = async (basket: number): Promise<number> => {
     return res.data;
 }
 
-export const forecastOccupation = async (basket: number, time: Date, history_days: number): Promise<number> => {
+export const forecastOccupation = async (basket: number, time: Date, history_days: number): Promise<{[key: string]: any}> => {
     let now = new Date();
     let res = await client.get(`/api/occupation`, {
         params: {

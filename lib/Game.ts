@@ -26,7 +26,7 @@ class Game {
     static async create(basket: number, score1?: number, score2?: number): Promise<number> {
         score1 = score1 ?? 0;
         score2 = score2 ?? 0;
-        let conn = db.getConnection();
+        let conn = await db.getConnection();
         try {
             let res = await connectionQuery(conn, `INSERT INTO games VALUES ()`);
             let id = res.results.insertId;
@@ -50,6 +50,7 @@ class Game {
             await resetBasket(basket);
             return id;
         } catch(e) {
+            console.log(e);
             conn.rollback(() => conn.release());
             throw new HTTPError("Error while creating game", 500);
         }

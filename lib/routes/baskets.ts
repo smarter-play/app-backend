@@ -12,15 +12,12 @@ router.get('/', checkParamsMiddleware([], {"range": checkNumeric, "lat": checkNu
 async (req: express.Request, res: express.Response) => {
     if(req.query.range && req.query.lat && req.query.lon) {
         let baskets = await Basket.getInRange(parseFloat(req.query.lat as string), parseFloat(req.query.lon as string), parseFloat(req.query.range as string))
-        let basketsWithOccupation = await Promise.all(baskets.map(async (basket) => {
-            let occupation = await getCurrentOccupation(basket.id);
-            return {
-                ...basket,
-                occupation
-            }
-        }));
 
-        return res.json(basketsWithOccupation);
+        for(let basket of baskets) {
+            basket["occupation"] = (await getCurrentOccupation(basket.id)).occupation;
+        }
+
+        return res.json(baskets);
     } else {
         return res.json(await Basket.getAll());
     }
@@ -34,7 +31,7 @@ router.get('/:basketId/forecast', checkParamsMiddleware(["time"], {}), async (re
 
     let history_days = 30;
 
-    let occupation = await forecastOccupation(basketId, time, history_days);
+    let occupation = (await forecastOccupation(basketId, time, history_days)).occupation;
 
     return res.send({
         occupation
@@ -63,6 +60,7 @@ router.put('/:basketId/:teamId/ready', authMiddleware(), checkParamsMiddleware([
 
     await setReady(basket, team, user, ready);
     if(await getReady(basket)) {
+        console.log(`creating name on basket ${basket}`);
         await Basket.startGame(basket);
     }
 

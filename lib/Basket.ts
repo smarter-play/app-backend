@@ -63,7 +63,7 @@ class Basket {
 
     static async startGame(basket_id: number): Promise<void> {
         let game_id = await Game.create(basket_id);
-        
+        console.log(`game ID: ${game_id}`);
 
     }
 
