@@ -3,8 +3,9 @@ import Basket from '../Basket';
 import authMiddleware from '../middleware/auth';
 import checkParamsMiddleware from '../middleware/params';
 import { checkNumeric } from '../utils';
-import { addToTeam, setReady, getReady } from '../redis';
+import { addToTeam, setReady, getReady, getRunningGames } from '../redis';
 import { getCurrentOccupation, forecastOccupation } from '../occupation';
+import Game from '../Game';
 
 let router = express.Router();
 
@@ -72,5 +73,17 @@ router.get('/:basketId', async (req: express.Request, res: express.Response) => 
 
     return res.json((await Basket.getTeams(basketId)));
 });
+
+router.get('/:basketId/running', async (req: express.Request, res: express.Response) => {
+    let basketId = parseInt(req.params.basketId);
+    let allGames = await Game.getGameByBasketId(basketId);
+    console.log({allGames})
+    let runningGames = await getRunningGames();
+    console.log({runningGames})
+    return res.json({
+        running: allGames.filter(game => runningGames.includes(game.id))
+    });
+});
+
 
 export = router;

@@ -95,7 +95,10 @@ class Game {
     }
 
     static async getGameByBasketId(basket_id: number): Promise<Game[]> {
-        let results = db.query("SELECT id, basket, score1, score2, created_at FROM simple_games WHERE basket=?", [basket_id]);
+        let results = await db.query(`
+        SELECT id, basket, score1, score2, created_at
+        FROM simple_games
+        WHERE basket=?`, [basket_id]);
         return results.results;
     }
 
