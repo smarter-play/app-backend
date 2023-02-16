@@ -7,7 +7,7 @@ let client = axios.create({
 export const getCurrentOccupation = async (basket: number): Promise<{[key: string]: any}> => {
     console.log({
         basket,
-        t: new Date().toISOString()
+        t: new Date().toISOString().substring(0, 19),
     });
     
     let res = await client.get(`/api/occupation`, {
@@ -24,8 +24,8 @@ export const forecastOccupation = async (basket: number, time: Date, history_day
     let res = await client.get(`/api/occupation`, {
         params: {
             basket,
-            t: time.toISOString(),
-            present: now.toISOString(),
+            t: time.toISOString().substring(0, 19),
+            present: now.toISOString().substring(0, 19),
             num_history_days: history_days,
             num_predicted_days: Math.ceil((time.getTime() - now.getTime())/1000/60/60/24)
         }
