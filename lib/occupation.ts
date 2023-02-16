@@ -5,11 +5,6 @@ let client = axios.create({
 });
 
 export const getCurrentOccupation = async (basket: number): Promise<{[key: string]: any}> => {
-    console.log({
-        basket,
-        t: new Date().toISOString()
-    });
-    
     let res = await client.get(`/api/occupation`, {
         params: {
             basket,
