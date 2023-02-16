@@ -13,7 +13,7 @@ export const getCurrentOccupation = async (basket: number): Promise<{[key: strin
     let res = await client.get(`/api/occupation`, {
         params: {
             basket,
-            t: new Date().toISOString()
+            t: new Date().toISOString().substring(0, 19),
         }
     });
     return res.data;

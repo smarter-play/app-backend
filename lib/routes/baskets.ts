@@ -15,6 +15,7 @@ async (req: express.Request, res: express.Response) => {
         let baskets = await Basket.getInRange(parseFloat(req.query.lat as string), parseFloat(req.query.lon as string), parseFloat(req.query.range as string))
 
         for(let basket of baskets) {
+            console.log("occupation request")
             basket["occupation"] = (await getCurrentOccupation(basket.id)).occupation;
         }
 
