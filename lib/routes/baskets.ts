@@ -16,7 +16,7 @@ async (req: express.Request, res: express.Response) => {
 
         for(let basket of baskets) {
             console.log("occupation request")
-            basket["occupation"] = (await getCurrentOccupation(basket.id)).occupation;
+            basket["occupation"] = Math.round((await getCurrentOccupation(basket.id)).occupation*100);
         }
 
         return res.json(baskets);
@@ -33,7 +33,7 @@ router.get('/:basketId/forecast', checkParamsMiddleware(["time"], {}), async (re
 
     let history_days = 30;
 
-    let occupation = (await forecastOccupation(basketId, time, history_days)).occupation;
+    let occupation = Math.round((await forecastOccupation(basketId, time, history_days)).occupation*100);
 
     return res.send({
         occupation
