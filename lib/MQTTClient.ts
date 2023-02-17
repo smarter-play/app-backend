@@ -71,18 +71,22 @@ export default class MQTTClient{
         await redis.getRunningGames().then(async (runningGames: number[]) => {
             // if basket_id is not in running games, add it
 
-            Game.getGameByBasketId(basket_id).then(async (game: any) => {
-                if (game == undefined) return;
-                if (!runningGames.includes(game.id)) {
-                    await redis.addRunningGame(game.id);
-                    // TESTING CREATION
-                    await Game.create(game.id).catch((err: any) => {
-                        console.log(err);
-                    });
-                }
-            }).catch((err: any) => {
+            let game = await Game.getGameByBasketId(basket_id).catch((err: any) => {
                 console.log(err);
             });
+            if (game == undefined) {
+                /* TESTING CREATION
+                let game_id = await Game.create(basket_id).catch((err: any) => {
+                    console.log(err);
+                });
+                await redis.addRunningGame(game_id!);*/
+                return;
+            }
+
+            if (!runningGames.includes(game.id)) {
+                await redis.addRunningGame(game.id);
+            }
+            
 
         }).catch((err: any) => {
             console.log(err);
