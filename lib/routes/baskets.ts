@@ -77,7 +77,7 @@ router.get('/:basketId', async (req: express.Request, res: express.Response) => 
 
 router.get('/:basketId/running', async (req: express.Request, res: express.Response) => {
     let basketId = parseInt(req.params.basketId);
-    let allGames = await Game.getGameByBasketId(basketId);
+    let allGames = await Game.getAllGamesByBasketId(basketId);
     console.log({allGames})
     let runningGames = await getRunningGames();
     console.log({runningGames})

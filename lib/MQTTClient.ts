@@ -70,12 +70,20 @@ export default class MQTTClient{
         // check on redis if game is in running game
         await redis.getRunningGames().then(async (runningGames: number[]) => {
             // if basket_id is not in running games, add it
-            if (!runningGames.includes(basket_id)) {
-                await redis.addRunningGame(basket_id);
-                await Game.create(basket_id).catch((err: any) => {
-                    console.log(err);
-                });
-            };
+
+            Game.getGameByBasketId(basket_id).then(async (game: any) => {
+                if (game == undefined) return;
+                if (!runningGames.includes(game.id)) {
+                    await redis.addRunningGame(game.id);
+                    // TESTING CREATION
+                    await Game.create(game.id).catch((err: any) => {
+                        console.log(err);
+                    });
+                }
+            }).catch((err: any) => {
+                console.log(err);
+            });
+
         }).catch((err: any) => {
             console.log(err);
         });
@@ -120,8 +128,12 @@ export default class MQTTClient{
 
             try {
                 let runningGames: number[] = await redis.getRunningGames();
-                    // if basket_id is not in running games, add it
-                if (!runningGames.includes(basket_id)) return;
+                let game = await Game.getGameByBasketId(basket_id).catch((err: any) => {
+                    console.log(err);
+                });
+                if (game == undefined) return;
+                if (!runningGames.includes(game.id)) return;
+                
             } catch(err: any) {
                 console.log(err);
             }
@@ -131,11 +143,12 @@ export default class MQTTClient{
             const game = await Game.getGameByBasketId(basket_id).catch((err: any) => {
                 console.log(err);
             });
-            if (game == null) return;
+            if (game == undefined) return;
+
             
             // prendi il primo risultato della select
-            const score1 = game[0].score1;
-            const score2 = game[0].score2;
+            const score1 = game.score1;
+            const score2 = game.score2;
             
             switch(button_id){
                 case 0:

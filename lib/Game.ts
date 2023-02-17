@@ -82,8 +82,8 @@ class Game {
             FROM simple_games
             WHERE id IN (
                 SELECT game FROM games_to_users WHERE user=?
-            )
-            `, [user_id]);
+            )`, 
+            [user_id]);
         return result.results;
     }
 
@@ -94,7 +94,21 @@ class Game {
         );
     }
 
-    static async getGameByBasketId(basket_id: number): Promise<Game[]> {
+    static async getGameByBasketId(basket_id: number): Promise<Game | null> {
+        let results = await db.query(`
+        SELECT id, basket, score1, score2, created_at
+        FROM simple_games
+        WHERE basket=?
+        ORDER BY created_at DESC`, [basket_id]);
+
+        if (results.results.length == 0) return null;
+        let el = results.results[0];
+        if (el == undefined) return null;
+        let users: User[] = [];
+        return new Game(el.id, el.basket, el.score1, el.score2, users, el.created_at);
+    }
+
+    static async getAllGamesByBasketId(basket_id: number): Promise<Game[]> {
         let results = await db.query(`
         SELECT id, basket, score1, score2, created_at
         FROM simple_games
@@ -116,12 +130,6 @@ class Game {
             'INSERT INTO score_data(basket_id, timestamp) VALUES (?, ?)',
             [basket_id, timestamp]
         );
-
-        /* await db.query(
-            'UPDATE simple_games SET created_at=? WHERE basket=?',
-            [timestamp, basket_id]
-        ); */
-
     }
 
     static async insertAccelerometerData(basket_id: number, acc_x: number, acc_y: number, acc_z: number, gyro_x: number, gyro_y: number, gyro_z: number, temperature: number, timestamp: Date): Promise<void> {
