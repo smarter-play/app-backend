@@ -156,15 +156,8 @@ class Game {
             }
             
         }
-        
-        let ret: MotivationalMessageSchema[] = Object.values(map);
-
-        (ret as {[key: string]: any}[]).sort((a, b) => {
-            return a[order_by] > b[order_by] ? 1 : -1
-        });
     
-    
-        return results.results;
+        return Object.values(map);
     }
 
     static async checkIfBasketExists(basket_id: number): Promise<boolean> {
