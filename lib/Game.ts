@@ -10,16 +10,18 @@ class Game {
     basket: number;
     score1: number;
     score2: number;
-    users: User[];
+    team1: User[];
+    team2: User[];
     created_at: Date;
     
 
-    constructor(id: number, basket: number, score1: number, score2: number, users: User[], created_at: Date) {
+    constructor(id: number, basket: number, score1: number, score2: number, team1: User[], team2: User[], created_at: Date) {
         this.id = id;
         this.basket = basket;
         this.score1 = score1;
         this.score2 = score2;
-        this.users = users;
+        this.team1 = team1;
+        this.team2 = team2;
         this.created_at = created_at;
     }
 
@@ -60,20 +62,52 @@ class Game {
 
     static async getById(id: number): Promise<Game | null> {
         let result =  await db.query(`
-            SELECT simple_games.id, basket, score1, score2, created_at, users.id, users.name, users.email, users.password, users.created_at, users.score
+            SELECT
+                simple_games.id,
+                basket,
+                score1,
+                score2,
+                created_at,
+                u1.id as u1_id,
+                u1.name as u1_name,
+                u1.surname as u1_surname,
+                u1.email as u1_email,
+                u1.date_of_birth as u1_date_of_birth,
+                u1.score as u1_score,
+                u2.id as u2_id,
+                u2.name as u2_name,
+                u2.surname as u2_surname,
+                u2.email as u2_email,
+                u2.date_of_birth as u2_date_of_birth,
+                u2.score as u2_score
             FROM simple_games
-            JOIN games_to_users ON games_to_users.game=simple_games.id
-            JOIN users ON users.id=games_to_users.user
-            WHERE id=?`,
+            LEFT JOIN games_to_users gtu1 ON gtu1.team = 1 AND  gtu1.game = simple_games.id
+            LEFT JOIN games_to_users gtu2 ON gtu2.team = 2 AND gtu2.game = simple_games.id
+            LEFT JOIN users u1 ON u1.id=gtu1.user
+            LEFT JOIN users u2 ON u2.id=gtu2.user
+            WHERE simple_games.id=?`,
         [id]);
-        let el = result.results[0];
-        if(el == undefined) return null;
 
-        let users: User[] = [];
-        for(let user of result.results) {
-            users.push(new User(user.id, user.name, user.email, user.password, user.created_at, user.score));
+        let e = result.results[0];
+        if(e == undefined) throw new HTTPError(`game ${id} not found`, 404)
+        let el = {
+            id: e.id,
+            basket: e.basket,
+            score1: e.score1,
+            score2: e.score2,
+            created_at: e.created_at,
+            team1: [],
+            team2: [],
+        };
+
+        for(let elem of result.results) {
+            if(elem.u1_id != null)
+                (el.team1 as User[]).push(new User(elem.u1_id, elem.u1_name, elem.u1_surname, elem.u1_email, elem.u1_date_of_birth, elem.u1_score));
+            if(elem.u2_id != null)
+                (el.team2 as User[]).push(new User(elem.u2_id, elem.u2_name, elem.u2_surname, elem.u2_email, elem.u2_date_of_birth, elem.u2_score));
         }
-        return new Game(id, el.basket, el.score1, el.score2, users, el.created_at);
+
+        return new Game(el.id, el.basket, el.score1, el.score2, el.team1, el.team2, el.created_at);
     }
 
     static async getByUserId(user_id: number): Promise<Game[]> {
@@ -104,8 +138,7 @@ class Game {
         if (results.results.length == 0) return null;
         let el = results.results[0];
         if (el == undefined) return null;
-        let users: User[] = [];
-        return new Game(el.id, el.basket, el.score1, el.score2, users, el.created_at);
+        return new Game(el.id, el.basket, el.score1, el.score2, [], [], el.created_at);
     }
 
     static async getAllGamesByBasketId(basket_id: number): Promise<Game[]> {
@@ -129,14 +162,13 @@ class Game {
                 u2.date_of_birth as u2_date_of_birth,
                 u2.score as u2_score
             FROM simple_games
-            LEFT JOIN games_to_users gtu1 ON gtu1.game = simple_games.id
-            LEFT JOIN games_to_users gtu2 ON gtu2.game = simple_games.id
+            LEFT JOIN games_to_users gtu1 ON gtu1.team = 1 AND  gtu1.game = simple_games.id
+            LEFT JOIN games_to_users gtu2 ON gtu2.team = 2 AND gtu2.game = simple_games.id
             LEFT JOIN users u1 ON u1.id=gtu1.user
             LEFT JOIN users u2 ON u2.id=gtu2.user
             WHERE
-                gtu1.team = 1 AND 
-                gtu2.team = 2 AND
                 basket=?`, [basket_id]);
+
 
         let map: {[key: number]: any} = {};
 
@@ -152,7 +184,28 @@ class Game {
                     team2: el.u2_id != null ? [new User(el.u2_id, el.u2_name, el.u2_surname, el.u2_email, el.u2_date_of_birth, el.u2_score)] : [],
                 }
             } else {
-                (map[el.id].team1 as User[]).push()
+                if(el.u1_id != null)
+                    (map[el.id].team1 as User[]).push(
+                        new User(
+                            el.u1_id,
+                            el.u1_name,
+                            el.u1_surname,
+                            el.u1_email,
+                            el.u1_date_of_birth,
+                            el.u1_score
+                        )
+                    );
+                if(el.u2_id != null)
+                    (map[el.id].team2 as User[]).push(
+                        new User(
+                            el.u2_id,
+                            el.u2_name,
+                            el.u2_surname,
+                            el.u2_email,
+                            el.u2_date_of_birth,
+                            el.u2_score
+                        )
+                    );
             }
             
         }
@@ -190,12 +243,41 @@ class Game {
         );
     }
 
-    static async updateScore(basket_id: number, score1: number, score2: number): Promise<void> {
-        return await db.query(
-            'UPDATE simple_games SET score1=?, score2=? WHERE basket=?',
-            [score1, score2, basket_id]
+    static async incrementScore1(game_id: number): Promise<void> {
+        await db.query(
+            'UPDATE simple_games SET score1=score1+1 WHERE id=?',
+            [game_id]
         );
+
+        await db.query(`
+            UPDATE users SET score=score+1
+            WHERE id IN (
+                SELECT user
+                FROM games_to_users
+                WHERE game = ? AND team = 1
+            )
+        `, [game_id])
+
+
     }
+
+    static async incrementScore2(game_id: number): Promise<void> {
+        await db.query(
+            'UPDATE simple_games SET score2=score2+1 WHERE id=?',
+            [game_id]
+        );
+
+        await db.query(`
+            UPDATE users SET score=score+1
+            WHERE id IN (
+                SELECT user
+                FROM games_to_users
+                WHERE game = ? AND team = 2
+            )
+        `, [game_id])
+    }
+
+
 
     static async addToTeam(team: number, basket_id: number): Promise<void> {
         if(team != 1 && team != 2) throw new HTTPError( "Team must be 1 or 2", 400);

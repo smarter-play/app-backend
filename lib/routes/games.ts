@@ -16,7 +16,9 @@ router.post('/', checkParamsMiddleware(["basket"], {
 
 router.get('/:gameId', async (req: express.Request, res: express.Response) => {
     let gameId = parseInt(req.params.gameId);
-    let game = await Game.getById(gameId);
+    let game = await Game.getById(gameId).catch((e) => {
+        return res.status(404).send("Game not found");
+    });
 
     if(game == undefined) {
         throw new HTTPError("Game Not Found", 404);

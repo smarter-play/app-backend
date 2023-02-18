@@ -156,10 +156,10 @@ export default class MQTTClient{
             
             switch(button_id){
                 case 0:
-                    Game.updateScore(basket_id, score1 + 1, score2);
+                    Game.incrementScore1(game.id);
                     break;
                 case 1:
-                    Game.updateScore(basket_id, score1, score2 + 1);
+                    Game.incrementScore2(game.id);
                     break;
                 default:
                     console.log("Unknown button id");
