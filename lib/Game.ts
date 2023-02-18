@@ -111,14 +111,77 @@ class Game {
     }
 
     static async getByUserId(user_id: number): Promise<Game[]> {
-        let result =  await db.query(`
-            SELECT id, basket, score1, score2, created_at
+        let results =  await db.query(`
+            SELECT
+                simple_games.id,
+                basket,
+                score1,
+                score2,
+                created_at,
+                u1.id as u1_id,
+                u1.name as u1_name,
+                u1.surname as u1_surname,
+                u1.email as u1_email,
+                u1.date_of_birth as u1_date_of_birth,
+                u1.score as u1_score,
+                u2.id as u2_id,
+                u2.name as u2_name,
+                u2.surname as u2_surname,
+                u2.email as u2_email,
+                u2.date_of_birth as u2_date_of_birth,
+                u2.score as u2_score
             FROM simple_games
-            WHERE id IN (
+            LEFT JOIN games_to_users gtu1 ON gtu1.team = 1 AND  gtu1.game = simple_games.id
+            LEFT JOIN games_to_users gtu2 ON gtu2.team = 2 AND gtu2.game = simple_games.id
+            LEFT JOIN users u1 ON u1.id=gtu1.user
+            LEFT JOIN users u2 ON u2.id=gtu2.user
+            WHERE simple_games.id IN (
                 SELECT game FROM games_to_users WHERE user=?
             )`, 
             [user_id]);
-        return result.results;
+
+            let map: {[key: number]: any} = {};
+
+            for(let el of results.results) {
+                if(map[el.id] as any == undefined) {
+                    map[el.id] = {
+                        id: el.id,
+                        basket: el.basket,
+                        score1: el.score1,
+                        score2: el.score2,
+                        created_at: el.created_at,
+                        team1: el.u1_id != null ? [new User(el.u1_id, el.u1_name, el.u1_surname, el.u1_email, el.u1_date_of_birth, el.u1_score)] : [],
+                        team2: el.u2_id != null ? [new User(el.u2_id, el.u2_name, el.u2_surname, el.u2_email, el.u2_date_of_birth, el.u2_score)] : [],
+                    }
+                } else {
+                    if(el.u1_id != null)
+                        (map[el.id].team1 as User[]).push(
+                            new User(
+                                el.u1_id,
+                                el.u1_name,
+                                el.u1_surname,
+                                el.u1_email,
+                                el.u1_date_of_birth,
+                                el.u1_score
+                            )
+                        );
+                    if(el.u2_id != null)
+                        (map[el.id].team2 as User[]).push(
+                            new User(
+                                el.u2_id,
+                                el.u2_name,
+                                el.u2_surname,
+                                el.u2_email,
+                                el.u2_date_of_birth,
+                                el.u2_score
+                            )
+                        );
+                }
+                
+            }
+        
+            return Object.values(map);
+    
     }
 
     static async addUser(game_id: number, user_id: number, team: number, conn: Connection): Promise<void> {
