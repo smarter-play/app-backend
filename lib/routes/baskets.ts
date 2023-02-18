@@ -61,6 +61,7 @@ router.put('/:basketId/:teamId/ready', authMiddleware(), checkParamsMiddleware([
     let team = parseInt(req.params.teamId);
 
     await setReady(basket, team, user, ready);
+    console.log("set ready to "+ready);
     if(await getReady(basket)) {
         console.log(`creating name on basket ${basket}`);
         await Basket.startGame(basket);
@@ -78,9 +79,8 @@ router.get('/:basketId', async (req: express.Request, res: express.Response) => 
 router.get('/:basketId/running', async (req: express.Request, res: express.Response) => {
     let basketId = parseInt(req.params.basketId);
     let allGames = await Game.getAllGamesByBasketId(basketId);
-    console.log({allGames})
     let runningGames = await getRunningGames();
-    console.log({runningGames})
+    console.log({filtered: allGames.filter(game => runningGames.includes(game.id))})
     return res.json({
         running: allGames.filter(game => runningGames.includes(game.id))
     });

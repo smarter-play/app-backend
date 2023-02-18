@@ -1,6 +1,6 @@
 {
     "watch": ["**/*.ts"],
     "ignore": ["build"],
-    "exec": "tsc && node build/main.js",
+    "exec": "tsc && node build/main.js || exit 1",
     "ext": "ts"
 }

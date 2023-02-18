@@ -1,6 +1,6 @@
 import db from './db';
 import Court from './Court';
-import { getTeam } from './redis';
+import { addRunningGame, endGame, getTeam } from './redis';
 import User from './User';
 import Game from './Game';
 
@@ -63,6 +63,12 @@ class Basket {
 
     static async startGame(basket_id: number): Promise<void> {
         let game_id = await Game.create(basket_id);
+
+        let games = await Game.getAllGamesByBasketId(basket_id);
+        for(let game of games) {
+            await endGame(game.id);
+        }
+        await addRunningGame(game_id);
         console.log(`game ID: ${game_id}`);
 
     }

@@ -75,14 +75,19 @@ export const setReady = async (basket_id: number, team: number, user: number, re
 export const getReady = async (basket_id: number): Promise<boolean> => {
     let team1 = await getTeam(basket_id, 1);
     let team2 = await getTeam(basket_id, 2);
-
+    console.log({team1, team2})
+    if(team1.length === 0 && team2.length === 0) {
+        return false;
+    }
     for(let i = 0; i < team1.length; i++) {
         let raw = await client.get(`basket:${basket_id}:team:1:user:${team1[i]}:ready`);
+        console.log({raw})
         if(raw != '1') return false;
     }
 
     for(let i = 0; i < team2.length; i++) {
         let raw = await client.get(`basket:${basket_id}:team:2:user:${team2[i]}:ready`);
+        console.log({raw})
         if(raw != '1') return false;
     }
 
