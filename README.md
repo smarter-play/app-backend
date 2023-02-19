@@ -1,3 +1,3 @@
 # SmarterPlay backend
 
-si ringrazia il solito boss per [il template di base](https://github.com/emilianomaccaferri/dockerissimo-node).
+[API Documentation](https://documenter.getpostman.com/view/3184889/2s93CHuEuQ)
