@@ -347,6 +347,36 @@ class Game {
         
     }
 
+    static async isActive(game_id: number): Promise<boolean> {
+
+        let basket_id = (await db.query(`
+            SELECT basket
+            FROM simple_games
+            WHERE id=?
+        `, [game_id]))[0].basket;
+        let recentData = await db.query(`
+            SELECT timestamp
+            FROM score_data
+            WHERE basket_id=?
+            AND timestamp >= NOW() - INTERVAL 5 MINUTE
+            UNION
+            SELECT timestamp
+            FROM accelerometer_data
+            WHERE basket_id=?
+            AND timestamp >= NOW() - INTERVAL 5 MINUTE
+            UNION
+            SELECT timestamp
+            FROM people_detected_data
+            WHERE basket_id=?
+            AND timestamp >= NOW() - INTERVAL 5 MINUTE
+        `, [basket_id, basket_id, basket_id]);
+
+        if(recentData.length > 0) return true;
+
+        return false;
+
+    }
+
 
     get schemaData() {
         return {

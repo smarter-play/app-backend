@@ -21,7 +21,7 @@ export const getCurrentOccupation = async (basket: number): Promise<{[key: strin
 
 export const forecastOccupation = async (basket: number, time: Date, history_days: number): Promise<{[key: string]: any}> => {
     let now = new Date();
-    let res = await client.get(`/api/occupation`, {
+    let res = await client.get(`/api/forecast_occupation`, {
         params: {
             basket,
             t: time.toISOString().substring(0, 19),

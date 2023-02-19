@@ -4,6 +4,7 @@ import Router from "./lib/Router";
 import db from "./lib/db";
 import MQTTClient from "./lib/MQTTClient";
 import initTables from './migrations/tables';
+import { scheduleJobs } from "./lib/jobs";
 
 dotenv.config();
 
@@ -12,6 +13,8 @@ router.init();
 
 const mqtt_client = new MQTTClient();
 mqtt_client.init();
+
+scheduleJobs();
 
 db.init();
 console.log("hot reloading!")
