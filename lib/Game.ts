@@ -364,11 +364,6 @@ class Game {
             FROM accelerometer_data
             WHERE basket_id=?
             AND timestamp >= NOW() - INTERVAL 5 MINUTE
-            UNION
-            SELECT timestamp
-            FROM people_detected_data
-            WHERE basket_id=?
-            AND timestamp >= NOW() - INTERVAL 5 MINUTE
         `, [basket_id, basket_id, basket_id]);
 
         if(recentData.length > 0) return true;

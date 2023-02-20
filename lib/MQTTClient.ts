@@ -150,10 +150,6 @@ export default class MQTTClient{
             if (game == undefined) return;
 
             
-            // prendi il primo risultato della select
-            const score1 = game.score1;
-            const score2 = game.score2;
-            
             switch(button_id){
                 case 0:
                     Game.incrementScore1(game.id);
